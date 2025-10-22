@@ -214,7 +214,7 @@ async def main():
     PROXY_URL = "http://your-proxy:port"  # Замените на ваш прокси
 
     # Создаем парсер
-    parser = SiteParser(
+    parser = Parser(
         base_url=BASE_URL,
         max_pages=MAX_PAGES,
         use_proxy=True,
