@@ -20,6 +20,12 @@ class Result:
     product: str
     proxy_used: bool
     status: str
+    clear_conditions : int
+    polite_employee : int
+    availability : int
+    convenience : int
+    city : str
+
 
 class Parser:
     def __init__(self, base_url, max_pages, proxy=False, proxy_url=None):
@@ -87,7 +93,21 @@ class Parser:
             #Извлекаем банк
             bank = ' '.join(product_element.get_text().split()[-2:])
 
-            #TODO парсинг прозрачные условия, вежливые сотрдники, доступность и поддерожка, удобства сайта
+            #Извлекаем условия l61f54b7b
+            extended_grade = soup.find_all('div', class_="ld017b199")
+            clear_conditions = len(extended_grade[0].find_all('div', class_="l61f54b7b"))
+
+            #Извлекаем сотрудников
+            polite_employee = len(extended_grade[1].find_all('div', class_="l61f54b7b"))
+
+            #Извлекаем доступность
+            availability = len(extended_grade[2].find_all('div', class_="l61f54b7b"))
+
+            #Излвекаем удобство
+            convenience = len(extended_grade[3].find_all('div', class_="l61f54b7b"))
+
+            #Извлекаем город
+            city = soup.find('span', class_="l3a372298").get_text()
 
             return Result(
                 url=page_num,
@@ -96,7 +116,14 @@ class Parser:
                 review=review,
                 bank=bank,
                 status="good",
-                proxy_used=proxy_used
+                proxy_used=proxy_used,
+                clear_conditions = clear_conditions,
+                polite_employee = polite_employee,
+                availability = availability,
+                convenience = convenience,
+                city = city
+
+
             )
 
         except Exception as e:
