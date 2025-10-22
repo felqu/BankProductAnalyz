@@ -15,7 +15,7 @@ from dotenv import find_dotenv, load_dotenv
 class Result:
     url: str
     grade: int
-    title: str
+    bank: str
     review: str
     product: str
     proxy_used: bool
@@ -57,7 +57,7 @@ class Parser:
                 grade=0,
                 product="",
                 review="",
-                title="",
+                bank="",
                 status="Error: No content",
                 proxy_used=proxy_used
             )
@@ -68,21 +68,34 @@ class Parser:
             # Извлекаем заголовок
             title = soup.find('title')
             title_text = title.text.strip() if title else "No title"
+
             #получаем сам отзыв
             div_element = soup.find('div', class_='MarkdownInsidestyled__MarkdownInsideStyled-sc-1frtivc-0 bKVLHc')
             review = div_element.find('p').get_text()
 
-            # Извлекаем основной контент (пример)
-            content_elements = soup.find_all(['p', 'div.content', 'article'])
-            content_preview = ' '.join([elem.get_text(strip=True) for elem in content_elements[:3]])[:200] + "..."
+            #получаем оценку
+            grade_div = soup.find('div', class_='rating-grade rating-grade--color-5 rating-grade--filled')
+            while grade_div is None:
+                for i in range(1, 5, 1):
+                    grade_div = soup.find('div', class_=f'rating-grade rating-grade--color{i} rating-grade--filled')
+            grade = grade_div.get_text()
+
+            # Извлекаем продукт
+            product_element = soup.find('h2', class_="page-section__header page-section__header-bottom-indent")
+            product = product_element.get_text().split()[2]
+
+            #Извлекаем банк
+            bank = ' '.join(product_element.get_text().split()[-2:])
+
+            #TODO парсинг прозрачные условия, вежливые сотрдники, доступность и поддерожка, удобства сайта
 
             return Result(
                 url=page_num,
-                grade=0,
-                product="",
+                grade=grade,
+                product=product,
                 review=review,
-                title="",
-                status="Error: No content",
+                bank=bank,
+                status="good",
                 proxy_used=proxy_used
             )
 
@@ -92,7 +105,7 @@ class Parser:
                 grade=0,
                 product="",
                 review="",
-                title="",
+                bank="",
                 status=f"Error:{e}",
                 proxy_used=proxy_used
             )
