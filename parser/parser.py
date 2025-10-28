@@ -62,7 +62,7 @@ class Parser:
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
         # Устанавливаем неявное ожидание
-        self.driver.implicitly_wait(10)
+        self.driver.implicitly_wait(3)
         return self.driver
 
     def close_driver(self):
@@ -113,7 +113,7 @@ class Parser:
         except NoSuchElementException:
             return []
 
-    async def parse_page_content(self, driver, page_num, proxy_used):
+    async def parse_page_content(self, url, driver, page_num, proxy_used):
         """Парсинг содержимого страницы с использованием Selenium"""
 
         try:
@@ -121,7 +121,7 @@ class Parser:
             html = driver.page_source
             if not html:
                 return Result(
-                    url=page_num,
+                    url=url,
                     grade=0,
                     product="",
                     review="",
@@ -225,7 +225,7 @@ class Parser:
             print(f"Successfully parsed page {page_num}")
 
             return Result(
-                url=page_num,
+                url=url,
                 grade=int(grade) if grade.isdigit() else 0,
                 product=product,
                 review=review,
@@ -242,7 +242,7 @@ class Parser:
         except Exception as e:
             print(f"Error parsing page {page_num}: {str(e)}")
             return Result(
-                url=page_num,
+                url=url,
                 grade=0,
                 product="",
                 review="",
@@ -256,13 +256,13 @@ class Parser:
                 city=""
             )
 
-    async def process_single_page(self, page_num, use_proxy=False):
+    async def process_single_page(self, url, page_num, use_proxy=False):
         """Обработка одной страницы с использованием Selenium"""
         driver, proxy_used = await self.fetch_with_selenium(page_num, use_proxy)
 
         if driver is None:
             result = Result(
-                url=page_num,
+                url=url,
                 grade=0,
                 product="",
                 review="",
@@ -380,7 +380,7 @@ async def main():
 
     try:
         # Парсим одну страницу через прямое соединение
-        await parser.run_direct_connection(12650570, 12650570)
+        await parser.run_direct_connection(12650560, 12650570)
 
     except Exception as e:
         print(f"Error during parsing: {e}")
@@ -395,7 +395,7 @@ async def main():
 
     # Сохраняем результаты
     parser.save_results("parsing_results.json")
-    parser.save_results_csv("parsing_results.csv")
+    #parser.save_results_csv("parsing_results.csv")
 
 
 if __name__ == "__main__":
