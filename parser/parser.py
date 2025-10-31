@@ -1,12 +1,15 @@
+import datetime
 import time
 import json
 import threading
 from dataclasses import dataclass, asdict
 from typing import Optional
+import csv
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from sympy.codegen.ast import continue_
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -23,6 +26,7 @@ from selenium.common.exceptions import (
 class Result:
     url: str
     grade: int
+    grade_accepted: bool
     bank: str
     review: str
     product: str
@@ -33,6 +37,7 @@ class Result:
     availability: int
     convenience: int
     city: str
+    date: str
 
 
 class Parser:
@@ -123,24 +128,59 @@ class Parser:
             except TimeoutException:
                 review = "Review element not found"
 
+            parent_grade_div = driver.find_element(By.CSS_SELECTOR, "div.lbb810226")
+
             # grade
+            grade_accepted = False
             grade = 0
-            for i in range(1, 6):
+            for i in range(5):
                 try:
-                    grade_div = driver.find_element(
+                    grade_div = parent_grade_div.find_element(
                         By.CSS_SELECTOR,
-                        f"div.rating-grade.rating-grade--color-{i}.rating-grade--filled"
+                         f"div[class^='rating-grade rating-grade--color-{i}']"
                     )
                     text = grade_div.text.strip()
                     if text.isdigit():
                         grade = int(text)
+                        if i == 0:
+                            grade_accepted = False
+                        else:
+                            grade_accepted = True
                         break
                 except NoSuchElementException:
                     continue
 
+            #datetime
+            date_time = "0"
+            try:
+                date_element = driver.find_element(By.CSS_SELECTOR, "span.l10fac986")
+                date_time = date_element.text.strip()
+
+
+
+
+            except NoSuchElementException:
+                pass
+
+
+
             # product / bank
             product = "Unknown"
             bank = "Unknown"
+            try:
+                title_text = driver.title
+
+                # Ищем позиции
+                start_pos = title_text.find('–') + 1  # +1 чтобы исключить сам символ -
+                end_pos = title_text.find('от')
+
+                if start_pos != -1 and end_pos != -1 and end_pos > start_pos:
+                    bank = title_text[start_pos:end_pos].strip()
+                    bank = title_text
+                else:
+                    bank = "Unknown"  # или какое-то значение по умолчанию
+            except Exception:
+                pass
             try:
                 product_element = driver.find_element(By.CSS_SELECTOR,
                                                       "h2.page-section__header.page-section__header-bottom-indent")
@@ -148,7 +188,6 @@ class Parser:
                     product_text = product_element.text.strip()
                     parts = product_text.split()
                     product = product_text
-                    bank = " ".join(parts[-2:]) if len(parts) >= 2 else "Unknown"
             except NoSuchElementException:
                 pass
 
@@ -185,6 +224,8 @@ class Parser:
                 clear_conditions=clear_conditions,
                 polite_employee=polite_employee,
                 availability=availability,
+                date = date_time,
+                grade_accepted=grade_accepted,
                 convenience=convenience,
                 city=city,
             )
@@ -200,6 +241,8 @@ class Parser:
                 proxy_used=proxy_used,
                 clear_conditions=0,
                 polite_employee=0,
+                date=None,
+                grade_accepted=False,
                 availability=0,
                 convenience=0,
                 city="",
@@ -310,32 +353,39 @@ class Parser:
             json.dump(results_dict, f, ensure_ascii=False, indent=2)
         print(f"Results saved to {filename}")
 
-    def save_results_csv(self, filename: str = "parsed_results.csv"):
-        import csv
+    def save_results_csv(self, filename: str = "parsed_results.csv", firststart: bool = False):
+
+
         with open(filename, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
-            writer.writerow(['URL', 'Grade', 'Product', 'Review', 'Bank', 'Status', 'Proxy Used',
-                             'Clear Conditions', 'Polite Employee', 'Availability', 'Convenience', 'City'])
+            if firststart:
+                writer.writerow([
+                    'URL', 'Grade', 'Grade Accepted', 'Bank', 'Review', 'Product',
+                    'Proxy Used', 'Status', 'Clear Conditions', 'Polite Employee',
+                    'Availability', 'Convenience', 'City', 'Date'
+                ])
             for result in self.results:
                 writer.writerow([
                     result.url,
                     result.grade,
-                    result.product,
-                    (result.review[:100] + "...") if len(result.review) > 100 else result.review,
+                    result.grade_accepted,
                     result.bank,
-                    result.status,
+                    (result.review[:100] + "...") if len(result.review) > 100 else result.review,
+                    result.product,
                     result.proxy_used,
+                    result.status,
                     result.clear_conditions,
                     result.polite_employee,
                     result.availability,
                     result.convenience,
-                    result.city
+                    result.city,
+                    result.date
                 ])
         print(f"Results saved to {filename}")
 
 
 # Пример синхронного main'а для запуска (alpha-версия, похожая на ваш оригинал)
-def main_sync(startpage, endpage):
+def main_sync(startpage, endpage, firststart = False):
     BASE_URL = "https://www.banki.ru/services/responses/bank/response/"
 
     parser = Parser(base_url=BASE_URL)
@@ -358,12 +408,15 @@ def main_sync(startpage, endpage):
     for u in unique_urls:
         print(f"  - {u}")
 
-    parser.save_results("result/parsing_results.json")
-    parser.save_results_csv("result/parsing_results.csv")
+    parser.save_results_csv("result/parsing_results31_10.csv", firststart=firststart)
 
 
 if __name__ == "__main__":
     start = 12622410
-    end = 12650570
+    #end = 12650570
+    end = 12622420
     for i in range(start, end, 10):
-        main_sync(i, i + 10)
+       if i == start:
+            main_sync(i, i + 9, firststart=True)
+       else:
+           main_sync(i, i+9, firststart=False)
