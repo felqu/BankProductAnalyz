@@ -64,6 +64,9 @@ class Parser:
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 
         prefs = {
             "profile.managed_default_content_settings.images": 2,
@@ -132,7 +135,7 @@ class Parser:
             # grade
             grade_accepted = False
             grade = 0
-            for i in range(5):
+            for i in range(6):
                 try:
                     grade_div = parent_grade_div.find_element(
                         By.CSS_SELECTOR,
@@ -369,7 +372,7 @@ class Parser:
                     result.grade,
                     result.grade_accepted,
                     result.bank,
-                    (result.review[:100] + "...") if len(result.review) > 100 else result.review,
+                    result.review,
                     result.product,
                     result.proxy_used,
                     result.status,
@@ -407,7 +410,7 @@ def main_sync(startpage, endpage, firststart = False):
     for u in unique_urls:
         print(f"  - {u}")
 
-    parser.save_results_csv("result/parsing_results31_10.csv", firststart=firststart)
+    parser.save_results_csv("result/parsing_results_02_11.csv", firststart=firststart)
 
 
 if __name__ == "__main__":
