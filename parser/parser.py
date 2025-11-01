@@ -410,12 +410,12 @@ def main_sync(startpage, endpage, firststart = False):
     for u in unique_urls:
         print(f"  - {u}")
 
-    parser.save_results_csv("result/parsing_results_02_11.csv", firststart=firststart)
+    parser.save_results_csv("result/another_parsing_results_02_11.csv", firststart=firststart)
 
 
 if __name__ == "__main__":
     start = 12622410
-    end = 12650570
+    end =   12650570
 
     for i in range(start, end, 10):
        if i == start:
