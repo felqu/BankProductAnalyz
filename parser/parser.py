@@ -9,7 +9,6 @@ import csv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from sympy.codegen.ast import continue_
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -413,8 +412,8 @@ def main_sync(startpage, endpage, firststart = False):
 
 if __name__ == "__main__":
     start = 12622410
-    #end = 12650570
-    end = 12622420
+    end = 12650570
+
     for i in range(start, end, 10):
        if i == start:
             main_sync(i, i + 9, firststart=True)
