@@ -64,9 +64,20 @@ class Parser:
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
+
+        # КРИТИЧЕСКИ ВАЖНЫЕ НАСТРОЙКИ для обхода детектирования
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+
+        # Установите реальный User-Agent (не headless)
+        real_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        chrome_options.add_argument(f"--user-agent={real_user_agent}")
+
+        # Дополнительные настройки для маскировки
+        chrome_options.add_argument("--disable-web-security")
+        chrome_options.add_argument("--allow-running-insecure-content")
+        chrome_options.add_argument("--disable-extensions")
 
         prefs = {
             "profile.managed_default_content_settings.images": 2,
@@ -410,11 +421,11 @@ def main_sync(startpage, endpage, firststart = False):
     for u in unique_urls:
         print(f"  - {u}")
 
-    parser.save_results_csv("result/another_parsing_results_02_11.csv", firststart=firststart)
+    parser.save_results_csv("result/another1_parsing_results_02_11.csv", firststart=firststart)
 
 
 if __name__ == "__main__":
-    start = 12622410
+    start = 12638619
     end =   12650570
 
     for i in range(start, end, 10):
