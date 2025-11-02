@@ -1,13 +1,8 @@
 
 import os
 import re
-from typing import List
-
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy import stats
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 200)
@@ -111,7 +106,7 @@ def preprocess_csv(in_path: str, out_path: str):
     df_filt.to_csv(out_path)
 
 if __name__ == "__main__":
-    df = pd.read_csv("result/parsing_results31_10.csv")
+    df = pd.read_csv("result/another_parsing_results_02_11.csv")
     df = df.dropna(subset=['Review']).drop_duplicates(subset=['Review'])
 
     df = process_bank_column(df)
@@ -119,4 +114,5 @@ if __name__ == "__main__":
         df = df.drop(columns=['Unnamed: 0'])
     except KeyError as e:
         print(e)
-    df.to_csv("result/filtered_bank1.csv")
+    df = df.drop(4290)
+    df.to_csv("result/filtered.csv")
