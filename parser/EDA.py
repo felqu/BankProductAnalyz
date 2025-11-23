@@ -7,15 +7,13 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# Настройка стиля для лучшей визуализации
+
 plt.style.use('seaborn-v0_8')
 sns.set_palette("husl")
 plt.rcParams['figure.figsize'] = (12, 8)
 
-df = pd.read_csv('result/filtered_bank1.csv',
-                 names=['URL', 'grade', 'grade_accepted', 'bank', 'review',
-                        'product', 'proxy_used', 'status', 'clear_conditions',
-                        'polite_employee', 'availability', 'convience', 'city', 'date'],
+df = pd.read_csv('../final dataset/dataset_with_sentiment2.csv',
+                 names=['Unnamed: 0','URL','grade Accepted','bank','product','proxy used','status','clear_conditions','polite_employee','availability','convience','city','date','review','grade','sentiment','NEUTRAL','POSITIVE','NEGATIVE'], #'Unnamed: 0','URL','Grade Accepted','Bank','Product','Proxy Used','Status','Clear Conditions','Polite Employee','Availability','Convenience','City','Date','Review','Grade','sentiment','NEUTRAL','POSITIVE','NEGATIVE'
                  skiprows=1)
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', None)
@@ -110,9 +108,9 @@ plt.pie(top_products.values,
 
 plt.title('Распределение отзывов по банковским продуктам (топ-8)',
           fontsize=16, fontweight='bold', pad=20)
-plt.axis('equal')  # Обеспечиваем круглую форму
+plt.axis('equal')
 
-# Добавляем легенду для лучшей читаемости
+
 plt.legend(top_products.index,
            title="Типы продуктов",
            loc="center left",
@@ -146,16 +144,13 @@ axes[7].set_xticklabels(status_counts.index, rotation=45)
 axes[7].set_title('Распределение по статусам', fontsize=12, fontweight='bold')
 axes[7].set_ylabel('Количество')
 
-# Оставляем последний subplot пустым
+
 axes[8].axis('off')
 
 plt.tight_layout()
 plt.show()
 
-# 4. Анализ выбросов
-print("\n" + "=" * 50)
-print("АНАЛИЗ ВЫБРОСОВ")
-print("=" * 50)
+
 
 fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 axes = axes.ravel()

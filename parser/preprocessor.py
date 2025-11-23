@@ -106,7 +106,7 @@ def preprocess_csv(in_path: str, out_path: str):
     df_filt.to_csv(out_path)
 
 if __name__ == "__main__":
-    df = pd.read_csv("result/another_parsing_results_02_11.csv")
+    df = pd.read_csv("20_02parseres.csv")
     df = df.dropna(subset=['Review']).drop_duplicates(subset=['Review'])
 
     df = process_bank_column(df)
@@ -115,4 +115,4 @@ if __name__ == "__main__":
     except KeyError as e:
         print(e)
     df = df.drop(4290)
-    df.to_csv("result/filtered.csv")
+    df.to_csv("result/dataset.csv")
