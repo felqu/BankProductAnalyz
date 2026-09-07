@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 from scipy.stats import chi2_contingency
 from statsmodels.stats.proportion import proportions_ztest
@@ -93,7 +95,6 @@ def check_hypotheses(file_path):
         else:
             print("Не отвергаем H0: Нет значимой связи между типом продукта и тональностью.")
 
-if __name__=="__main__":
-
-
-    check_hypotheses('../final dataset/dataset_with_sentiment2.csv')
+if __name__ == "__main__":
+    project_root = Path(__file__).resolve().parents[1]
+    check_hypotheses(project_root / "final dataset" / "dataset_with_sentiment2.csv")

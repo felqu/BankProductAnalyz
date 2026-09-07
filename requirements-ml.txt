@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Sentiment-model training and inference
+torch
+transformers
+scikit-learn
+tqdm

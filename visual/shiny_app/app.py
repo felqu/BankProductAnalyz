@@ -1,15 +1,15 @@
+from pathlib import Path
+
 from shiny import App, reactive, render, ui
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import io
-from datetime import datetime
 
-# Sample data as provided; in a real app, load from CSV
-data_path = "../../final dataset/dataset_with_sentiment2.csv"
+APP_DIR = Path(__file__).resolve().parent
+DATA_PATH = APP_DIR.parents[1] / "final dataset" / "dataset_with_sentiment2.csv"
 
-# Load data into DataFrame
-df = pd.read_csv(data_path)
+# Load data independently of the directory from which the app is started.
+df = pd.read_csv(DATA_PATH)
 
 # Parse Date column assuming format DD.MM.YYYY HH:MM
 def parse_date(date_str):
@@ -18,7 +18,7 @@ def parse_date(date_str):
     except:
         return pd.NaT
 
-df['Parsed_Date'] = df['Date'].apply(parse_date)
+df["Parsed_Date"] = df["Date"].apply(parse_date)
 
 # Helper to produce default datetime-local string (YYYY-MM-DDTHH:MM)
 def to_dt_local_string(dt):
@@ -27,27 +27,28 @@ def to_dt_local_string(dt):
     return dt.strftime("%Y-%m-%dT%H:%M")
 
 app_ui = ui.page_fluid(
-    ui.h2("Bank Reviews Dashboard"),
+    ui.include_css(str(APP_DIR / "styles.css")),
+    ui.h2("Дашборд отзывов о банковских продуктах"),
     ui.layout_sidebar(
         ui.sidebar(
-            ui.input_select("bank_filter", "Filter by Bank:", choices=["All"] + sorted(df["Bank"].unique().tolist())),
-            ui.input_select("product_filter", "Filter by Product:", choices=["All"] + sorted(df["Product"].unique().tolist())),
-            ui.input_select("city_filter", "Filter by City:", choices=["All"] + sorted(df["City"].unique().tolist())),
-            ui.input_select("sentiment_filter", "Filter by Sentiment:", choices=["All", "NEUTRAL", "POSITIVE", "NEGATIVE"]),
+            ui.input_select("bank_filter", "Банк:", choices=["All"] + sorted(df["Bank"].unique().tolist())),
+            ui.input_select("product_filter", "Продукт:", choices=["All"] + sorted(df["Product"].unique().tolist())),
+            ui.input_select("city_filter", "Город:", choices=["All"] + sorted(df["City"].unique().tolist())),
+            ui.input_select("sentiment_filter", "Тональность:", choices=["All", "NEUTRAL", "POSITIVE", "NEGATIVE"]),
             # Replaced date-only range with two datetime-local inputs (start + end)
             ui.tags.div(
-                ui.tags.label("Start (date & time):", **{"for":"start_dt"}),
+                ui.tags.label("Начало периода:", **{"for":"start_dt"}),
                 ui.tags.input(type="datetime-local", id="start_dt",
                               value=to_dt_local_string(df['Parsed_Date'].min())),
                 ui.tags.br(),
-                ui.tags.label("End (date & time):", **{"for":"end_dt"}),
+                ui.tags.label("Конец периода:", **{"for":"end_dt"}),
                 ui.tags.input(type="datetime-local", id="end_dt",
                               value=to_dt_local_string(df['Parsed_Date'].max())),
                 style="margin-top:8px;"
             ),
         ),
         ui.navset_tab(
-            ui.nav_panel("Overview",
+            ui.nav_panel("Обзор",
                 ui.row(
                     # reviews_by_bank wrapped into scrollable div with fixed max height
                     ui.column(6, ui.tags.div(ui.output_plot("reviews_by_bank"), style="max-height:480px; overflow-y:auto; padding-right:10px;")),
@@ -57,11 +58,11 @@ app_ui = ui.page_fluid(
                     ui.column(12, ui.output_plot("reviews_over_time")),
                 ),
             ),
-            ui.nav_panel("Sentiments",
+            ui.nav_panel("Тональность",
                 ui.row(
                     ui.column(12, ui.output_plot("sentiment_grade_relation")),
-
                     ui.column(6, ui.output_plot("sentiment_pie")),
+                    ui.column(6, ui.output_plot("ratings_box")),
                 ),
             ),
         ),
@@ -155,8 +156,8 @@ def server(input, output, session):
         fig, ax = plt.subplots(figsize=(8, fig_height))
 
         sns.barplot(data=df_plot, y="Bank", x="Count", ax=ax)
-        ax.set_title(f"Top {top_n} banks (+Other) — reviews count")
-        ax.set_xlabel("Count")
+        ax.set_title(f"Топ-{top_n} банков по числу отзывов")
+        ax.set_xlabel("Количество отзывов")
         ax.set_ylabel("")
 
         # подписи справа от баров
@@ -171,7 +172,7 @@ def server(input, output, session):
     def grade_distribution():
         fig, ax = plt.subplots()
         sns.histplot(data=filtered_df(), x="Grade", bins=5, kde=True, ax=ax)
-        ax.set_title("Distribution of Grades")
+        ax.set_title("Распределение оценок")
         return fig
 
     @output
@@ -206,9 +207,9 @@ def server(input, output, session):
 
         fig, ax = plt.subplots(figsize=(10, 4))
         ax.plot(x, y, marker='o')
-        ax.set_title("Reviews Over Time")
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Number of reviews")
+        ax.set_title("Динамика количества отзывов")
+        ax.set_xlabel("Дата")
+        ax.set_ylabel("Количество отзывов")
         fig.autofmt_xdate()
         plt.tight_layout()
         return fig
@@ -254,7 +255,7 @@ def server(input, output, session):
         sentiment_counts = filtered_df()["sentiment"].value_counts()
         fig, ax = plt.subplots()
         sentiment_counts.plot(kind="pie", autopct='%1.1f%%', ax=ax)
-        ax.set_title("Sentiment Breakdown")
+        ax.set_title("Распределение тональности")
         return fig
 
     @output
@@ -263,7 +264,7 @@ def server(input, output, session):
         ratings = filtered_df()[["Clear Conditions", "Polite Employee", "Availability", "Convenience"]].melt()
         fig, ax = plt.subplots()
         sns.boxplot(data=ratings, x="variable", y="value", ax=ax)
-        ax.set_title("Box Plot of Ratings")
+        ax.set_title("Распределение дополнительных оценок")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
         return fig
 

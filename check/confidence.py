@@ -1,9 +1,15 @@
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-df = pd.read_csv('../final dataset/dataset_with_sentiment2.csv')
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_PATH = PROJECT_ROOT / "final dataset" / "dataset_with_sentiment2.csv"
+OUTPUT_PATH = Path(__file__).with_name("confidence_distribution.png")
+
+df = pd.read_csv(DATA_PATH)
 
 
 df['max_confidence'] = df[['NEGATIVE', 'NEUTRAL', 'POSITIVE']].max(axis=1)
@@ -47,5 +53,5 @@ plt.ylabel('Количество отзывов')
 plt.title('Распределение уверенности модели')
 plt.legend()
 plt.grid(True, alpha=0.3)
-plt.savefig('confidence_distribution.png', dpi=300, bbox_inches='tight')
+plt.savefig(OUTPUT_PATH, dpi=300, bbox_inches='tight')
 plt.show()

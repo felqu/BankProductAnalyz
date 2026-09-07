@@ -1,6 +1,4 @@
-faicons
 shiny
-shinywidgets
-plotly
 pandas
-ridgeplot
+matplotlib
+seaborn

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +14,9 @@ plt.style.use('seaborn-v0_8')
 sns.set_palette("husl")
 plt.rcParams['figure.figsize'] = (12, 8)
 
-df = pd.read_csv('../final dataset/dataset_with_sentiment2.csv',
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+df = pd.read_csv(PROJECT_ROOT / 'final dataset' / 'dataset_with_sentiment2.csv',
                  names=['Unnamed: 0','URL','grade Accepted','bank','product','proxy used','status','clear_conditions','polite_employee','availability','convience','city','date','review','grade','sentiment','NEUTRAL','POSITIVE','NEGATIVE'], #'Unnamed: 0','URL','Grade Accepted','Bank','Product','Proxy Used','Status','Clear Conditions','Polite Employee','Availability','Convenience','City','Date','Review','Grade','sentiment','NEUTRAL','POSITIVE','NEGATIVE'
                  skiprows=1)
 pd.set_option('display.width', 1000)

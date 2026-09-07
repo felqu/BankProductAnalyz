@@ -3,6 +3,7 @@ import time
 import json
 import threading
 from dataclasses import dataclass, asdict
+from pathlib import Path
 from typing import Optional
 import csv
 
@@ -183,15 +184,11 @@ class Parser:
             try:
                 title_text = driver.title
 
-                # Ищем позиции
-                start_pos = title_text.find('–') + 1  # +1 чтобы исключить сам символ -
-                end_pos = title_text.find('от')
+                start_pos = title_text.find("–")
+                end_pos = title_text.find("от", start_pos + 1)
 
                 if start_pos != -1 and end_pos != -1 and end_pos > start_pos:
-                    bank = title_text[start_pos:end_pos].strip()
-                    bank = title_text
-                else:
-                    bank = "Unknown"  # или какое-то значение по умолчанию
+                    bank = title_text[start_pos + 1:end_pos].strip()
             except Exception:
                 pass
             try:
@@ -362,7 +359,7 @@ class Parser:
             d = asdict(result)
             d["timestamp"] = time.time()
             results_dict.append(d)
-        with open(filename, "a", encoding="utf-8") as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(results_dict, f, ensure_ascii=False, indent=2)
         print(f"Results saved to {filename}")
 
@@ -421,7 +418,8 @@ def main_sync(startpage, endpage, firststart = False):
     for u in unique_urls:
         print(f"  - {u}")
 
-    parser.save_results_csv("20_02parseres.csv", firststart=firststart)
+    output_path = Path(__file__).with_name("20_02parseres.csv")
+    parser.save_results_csv(str(output_path), firststart=firststart)
 
 
 if __name__ == "__main__":

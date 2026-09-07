@@ -1,0 +1,12 @@
+# Data processing, statistics and dashboard
+pandas
+numpy
+matplotlib
+seaborn
+scipy
+statsmodels
+shiny
+
+# Data collection
+selenium
+webdriver-manager
